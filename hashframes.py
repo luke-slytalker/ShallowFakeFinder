@@ -20,13 +20,19 @@ capture = cv.VideoCapture(vid_to_check)
 md5s = []       # list to store MD5 values for each frame
 sha1s = []      # list to store SHA1 values for each frame
 crops = []
-
+frm = 1
 # play the video until it's over or someone hits the 'D' key
 while True:
     isTrue, frame = capture.read()
-    cropped = frame[40:400, 40:400]     # experimental...
-                                        # sample only a portion of the video frame to check for "green screening"
-                                        # --- need to figure out sensitivity settings / how often the same hash comes up
+    if frm == 1:
+        r = cv.selectROI('ROI Select', frame)
+        cv.destroyWindow('ROI Select')
+    frm += 1
+
+    cropped = frame[int(r[1]):int(r[1]+r[3]), int(r[0]):int(r[0]+r[2])]
+        # experimental...
+        # sample only a portion of the video frame to check for "green screening"
+        # --- need to figure out sensitivity settings / how often the same hash comes up
 
     #cv.imshow('video', frame)
     try:
@@ -44,13 +50,13 @@ while True:
     if frame is None:
         break
     else:
-        md5hash = hashlib.md5(frame)        # change to _img_ for cropped value
+        md5hash = hashlib.md5(img)        # change to _img_ for cropped value or _frame_ for video frame
         md5hashed = md5hash.hexdigest()
         md5s.append(md5hashed)      # add to the MD5 list so we can later look for duplicates
         print("MD5:  " + str(md5hashed))
 
         # get the SHA1 hash value for the current frame
-        sha1Hash = hashlib.sha1(frame)      # change to _img_ for cropped value
+        sha1Hash = hashlib.sha1(img)      # change to _img_ for cropped value
         sha1Hashed = sha1Hash.hexdigest()
         sha1s.append(sha1Hashed)    # add to the SHA1 list so we can later look for duplicates
         #print("SHA1: " + str(sha1Hashed))
